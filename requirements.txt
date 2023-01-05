@@ -1,0 +1,13 @@
+protobuf==3.19.6
+scikit_image
+pydicom
+opencv_python==4.5.1.48
+tensorflow==2.2.0
+numpy
+matplotlib
+keras_unet_collection==0.1.11
+pandas
+glob2
+nibabel==3.2.1
+rich
+
