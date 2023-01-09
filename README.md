@@ -62,7 +62,8 @@ Moreover the proposed method's methodology is presented below
 
 
 ## Usage/Examples
- - An example for testing on your Prostate MR Imaging dataset could be found at the Demo_Testing_On_MRI_Prostate_data.ipynb also. Furthermore the repo has been dockerized and it could be available upon request
+ - An example for testing on your Prostate MR Imaging dataset could be found at the Demo_Testing_On_MRI_Prostate_data.ipynb also. Furthermore the repo has been dockerized and it could be available upon request. /
+The weights path for the region proposition U-Net model (The Weights could be downloaded from here https://drive.google.com/drive/folders/1uctJpPYj2LyE-kuuXPIv3BSXSXgC4AdY?usp=share_link)
 ```python
 from Testing_Utils.Raclahe_Process import * # import the package
 
