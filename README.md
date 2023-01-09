@@ -52,7 +52,7 @@ Several Results are shown below regarding the effectiveness of the proposed meth
 ![Python](https://img.shields.io/pypi/pyversions/p?color=g&logo=python&style=plastic)
 
 
-![ProCAncer AI](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png)
+![ProCAncer AI](Materials/Procancer_logo.png)
 
 
 ## Usage/Examples
