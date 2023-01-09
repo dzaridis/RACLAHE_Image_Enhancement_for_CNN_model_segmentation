@@ -32,7 +32,7 @@ Specifically, fig below indicate how the proposed image enhancement method effec
 ![Raclahe filter](Materials/explainability.png)
 
 Moreover, in the original paper an introduction of a quantitative metric has been performed, to quantify the model's uncertainty of its decision. Fig below presents the absolute mean substraction between the Ground truth labes and the Predicted labels of a single example under the effect of various Image enhancement methods.
-![Explainability](Materials/visual assessment.png)
+![Explainability](Materials/visual%20assessment.png)
 
 ## Acknowledgements
  - This work is supported by the ProCancer-I project, funded by the European Union’s Horizon 2020 research and innovation program under grant agreement No 952159. It reflects only the author's view. The Commission is not responsible for any use that may be made of the information it contains.
