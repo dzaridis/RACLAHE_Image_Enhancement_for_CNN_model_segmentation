@@ -12,7 +12,14 @@ The repo contains 2 packages
 
 
 ## Installation
+### First way of installation
+ - install the requirements.txt via pip 
+```bash
+  pip install requirements.txt
+  pip install raclahe
+```
 
+### Second way of installation
 In order to Utilize the project
  - install the requirements.txt via pip 
 ```bash
