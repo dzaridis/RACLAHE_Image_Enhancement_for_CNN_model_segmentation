@@ -13,7 +13,7 @@ The repo contains 2 packages
 
 ## Installation
 ### First way of installation
- - install the requirements.txt via pip and the raclahe package fro PyPI afterwards
+ - install the requirements.txt via pip and the raclahe package fro PyPI afterwards https://pypi.org/project/raclahe/
 ```bash
   pip install -r requirements.txt
   pip install raclahe==0.1.1 (current version)
