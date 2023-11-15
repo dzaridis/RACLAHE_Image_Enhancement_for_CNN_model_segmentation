@@ -33,7 +33,7 @@ import Training_Utils,Testing_Utils
 ### Docker Pull
 You can pull the docker directly from here
 ```bash
-docker push dimzaridis/raclahe_filter:tagname
+docker push dimzaridis/raclahe_filter:1.3
 ```
     
 ## Abstract
