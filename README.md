@@ -30,6 +30,11 @@ into your project and import them in a python editor (jupyter notebook, VScode e
 ```code
 import Training_Utils,Testing_Utils
 ```
+### Docker Pull
+You can pull the docker directly from here
+```bash
+docker push dimzaridis/raclahe_filter:tagname
+```
     
 ## Abstract
 Automatic segmentation of the prostate of and the prostatic zones on MRI remains one of the most compelling research areas. While different image enhancement techniques are emerging as powerful tools for improving the performance of segmentation algorithms, their application still lacks consensus due to contrasting evidence regarding performance improvement and cross-model stability, further hampered by the inability to explain models’ predictions. Particularly, for prostate segmentation, the effectiveness of image enhancement on different Convolutional Neural Networks (CNN) remains largely unexplored.  The present work introduces a novel image enhancement method, named RACLAHE, to enhance the performance of CNN models for segmenting the prostate’s gland and the prostatic zones. The improvement in performance and consistency across five CNN models (U-Net, U-Net++, U-Net3+, ResU-net and USE-NET) is compared against four popular image enhancement methods. Additionally, a methodology is proposed to explain, both quantitatively and qualitatively, the relation between saliency maps and ground truth probability maps. Overall, RACLAHE was the most consistent image enhancement algorithm in terms of performance improvement across CNN models with the mean increase in Dice Score ranging from 3% to 9% for the different prostatic regions, while achieving minimal inter-model variability. The integration of a feature driven methodology to explain the predictions after applying image enhancement methods, enables the development of a concrete, trustworthy automated pipeline for prostate segmentation on MR images.
