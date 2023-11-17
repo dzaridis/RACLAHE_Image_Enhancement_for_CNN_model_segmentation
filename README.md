@@ -9,7 +9,20 @@ The repo contains 2 packages
  - Testing_Utils for instant usability on Prostate MR images (Demo_Testing_on_MRI_Prostate_Data.ipynb consists an example of utilization)
  - Training_Utils for training a bounding box proposal network on your data (Demo_Training_Process.ipynb consists an example of training your bounding box proposal network)
 
-
+# Reference
+Please cite our work if youu find it valuable for your experiments. Thank you!
+```bibted
+@article{zaridis2023region,
+  title={Region-adaptive magnetic resonance image enhancement for improving CNN-based segmentation of the prostate and prostatic zones},
+  author={Zaridis, Dimitrios I and Mylona, Eugenia and Tachos, Nikolaos and Pezoulas, Vasileios C and Grigoriadis, Grigorios and Tsiknakis, Nikos and Marias, Kostas and Tsiknakis, Manolis and Fotiadis, Dimitrios I},
+  journal={Scientific Reports},
+  volume={13},
+  number={1},
+  pages={714},
+  year={2023},
+  publisher={Nature Publishing Group UK London}
+}
+```
 
 ## Installation
 ### First way of installation
