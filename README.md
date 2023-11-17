@@ -46,7 +46,7 @@ into your project and import them in a python editor (jupyter notebook, VScode e
 import Training_Utils,Testing_Utils
 ```
 ### Docker Pull
-You can pull the docker directly from here
+You can pull the docker directly from here. Firstly request access from dimzaridis@gmail.com
 ```bash
 docker push dimzaridis/raclahe_filter:2.0
 ```
