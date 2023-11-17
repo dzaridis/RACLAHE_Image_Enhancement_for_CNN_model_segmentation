@@ -22,10 +22,8 @@ Please cite our work if youu find it valuable for your experiments. Thank you!
   year={2023},
   publisher={Nature Publishing Group UK London}
 }
-
-Zaridis, Dimitrios I., et al. "Region-adaptive magnetic resonance image enhancement for improving CNN-based segmentation of the prostate and prostatic zones." Scientific Reports 13.1 (2023): 714.
 ```
-
+Zaridis, Dimitrios I., et al. "Region-adaptive magnetic resonance image enhancement for improving CNN-based segmentation of the prostate and prostatic zones." Scientific Reports 13.1 (2023): 714.
 ## Installation
 ### First way of installation
  - install the requirements.txt via pip and the raclahe package fro PyPI afterwards https://pypi.org/project/raclahe/
