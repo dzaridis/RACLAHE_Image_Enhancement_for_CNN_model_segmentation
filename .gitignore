@@ -130,3 +130,6 @@ dmypy.json
 
 # tensorflow
 *.h5
+DOCKER_USAGE.md
+input
+output

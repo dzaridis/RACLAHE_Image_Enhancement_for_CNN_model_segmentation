@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  raclahe:
+    image: raclage:3.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raclahe-processor
+    
+    # EUCAIM-style volume mounts (default configuration)
+    volumes:
+      - ./input:/home/ds/datasets:ro  # Read-only input (EUCAIM standard)
+      - ./output:/home/ds/persistent-home
+      - ./shared:/home/ds/persistent-shared-folder
+    
+    # Environment variables (optional overrides)
+    environment:
+      - INPUT_DIR=/home/ds/datasets
+      - OUTPUT_DIR=/home/ds/persistent-home/output
+      - WEIGHTS_PATH=/home/ds/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5
+    
+    # User configuration (matches EUCAIM requirements)
+    user: "1000:1000"
+    
+    # Resource limits (optional, adjust as needed)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       cpus: '4'
+    #       memory: 8G
+    #     reservations:
+    #       cpus: '2'
+    #       memory: 4G
+
+  # Alternative service for legacy path compatibility
+  raclahe-legacy:
+    image: raclage:3.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: raclahe-processor-legacy
+    profiles:
+      - legacy  # Only runs when --profile legacy is specified
+    
+    volumes:
+      - ./input:/dir/input:ro
+      - ./output:/dir/output
+    
+    environment:
+      - INPUT_DIR=/dir/input
+      - OUTPUT_DIR=/dir/output
+      - WEIGHTS_PATH=/home/ds/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5
+    
+    user: "1000:1000"
+

@@ -16,7 +16,7 @@ import tensorflow as tf
 import numpy as np
 from skimage.exposure import equalize_adapthist
 import time
-from filereader import *
+from utils.filereader import *
 
     
     

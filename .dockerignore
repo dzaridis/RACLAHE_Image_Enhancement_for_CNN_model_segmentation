@@ -1,0 +1,55 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation (keep compliance docs)
+Materials/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+test_*.py
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Notebooks (unless needed)
+*.ipynb
+.ipynb_checkpoints
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Local test data (if any)
+test_input/
+test_output/
+input/
+output/
+

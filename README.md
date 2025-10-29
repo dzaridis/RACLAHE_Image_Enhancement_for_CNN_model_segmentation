@@ -6,34 +6,82 @@ This repository supports the original publication in Nature's Scientific Reports
 
 ## Quick Start with Docker
 
-The fastest way to use RACLAHE is via our pre-built Docker image:
+### EUCAIM Platform (Recommended)
 
-```bash
-# Pull the Docker image
-docker pull dimzaridis/raclahe_filter:3.0
+This image is EUCAIM-compliant and can be run directly on the EUCAIM platform. The image follows EUCAIM security standards:
+- Runs as non-root user `ds` (uid 1000, gid 1000)
+- Uses standard EUCAIM volume mount points
+- No internet access required at runtime
+- Optimized for batch processing
 
-# Create input and output directories
-mkdir -p ./input ./output
+When running on EUCAIM, the volumes are automatically mounted at:
+- `/home/ds/datasets` - Input datasets (read-only)
+- `/home/ds/persistent-home` - Persistent user storage (output directory)
+- `/home/ds/persistent-shared-folder` - Shared storage
 
-# Run the container
-docker run -v $(pwd)/input:/dir/input -v $(pwd)/output:/dir/output dimzaridis/raclahe_filter:3.0
-```
-
-## Building the Docker Image Yourself
-
-If you prefer to build the image locally:
+### Quick Start with Docker Compose (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/YOUR_USERNAME/RACLAHE_Image_Enhancement_for_CNN_model_segmentation.git
 cd RACLAHE_Image_Enhancement_for_CNN_model_segmentation
 
-# Build the Docker image
-docker build -t raclahe_filter:local .
+# Create input and output directories
+mkdir -p input output shared
 
-# Run the container
-docker run -v $(pwd)/input:/dir/input -v $(pwd)/output:/dir/output raclahe_filter:local
+# Copy your medical imaging data to input/
+cp -r /path/to/your/data/* input/
+
+# Build and run with Docker Compose
+docker-compose up --build
 ```
+
+### Building the Docker Image Manually
+
+```bash
+# Build the Docker image
+docker build -t raclahe:3.0 .
+```
+
+### Running with Docker (without Compose)
+
+For local testing, you can override the default EUCAIM paths using environment variables:
+
+```bash
+# Create input and output directories
+mkdir -p ./input ./output
+
+# Run with EUCAIM-style paths (recommended)
+docker run \
+  -v $(pwd)/input:/home/ds/datasets:ro \
+  -v $(pwd)/output:/home/ds/persistent-home \
+  raclage:3.0
+
+# Or run with custom paths via environment variables
+docker run \
+  -e INPUT_DIR=/dir/input \
+  -e OUTPUT_DIR=/dir/output \
+  -v $(pwd)/input:/dir/input:ro \
+  -v $(pwd)/output:/dir/output \
+  raclage:3.0
+```
+
+### Using EUCAIM-Compliant Configuration
+
+For production deployment on EUCAIM platform:
+
+```bash
+# Copy environment template
+cp env.example .env
+
+# Edit .env with your paths
+nano .env
+
+# Run with EUCAIM configuration
+docker-compose -f docker-compose.eucaim.yml up --build
+```
+
+📖 For detailed usage instructions, see [DOCKER_USAGE.md](DOCKER_USAGE.md)
 
 ## Input Data Format
 

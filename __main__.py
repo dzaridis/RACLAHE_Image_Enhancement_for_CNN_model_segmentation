@@ -12,25 +12,41 @@ import warnings
 from time import sleep
 warnings.filterwarnings("ignore")
 
-user_input="/dir/input"#str(input())#"/dir/input"
-user_output="/dir/output"#str(input())#"/dir/output"
+# EUCAIM-compliant paths - can be overridden via environment variables
+user_input = os.getenv('INPUT_DIR', '/home/ds/datasets')
+user_output = os.getenv('OUTPUT_DIR', '/home/ds/persistent-home/output')
+weights_path = os.getenv('WEIGHTS_PATH', '/home/ds/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5')
+
+# Create output directory if it doesn't exist
+os.makedirs(user_output, exist_ok=True)
+
+# List directories in input path
 dirs = os.listdir(user_input)
-progress=Progress()
+progress = Progress()
 print('Raclahe filter application has been started ... ')
+print(f'Input directory: {user_input}')
+print(f'Output directory: {user_output}')
+print(f'Weights path: {weights_path}')
+print(f'Processing {len(dirs)} items...')
+
 with progress:
     task = progress.add_task("[bold green]Raclahe Processing...[/bold green]", total=len(dirs))
-    for index,file in enumerate(dirs): # lists the patients
+    for index, file in enumerate(dirs):  # lists the patients
         pat_dir = os.path.join(user_input, file)
-        #path_inp=os.path.join(user_input,file)
-        checker = MedicalImageReader(pat_dir)
-        raclahe_input = checker.read_image()
-        pat_name=str(file)
+        # Skip if not a directory
+        if not os.path.isdir(pat_dir):
+            progress.update(task, advance=1)
+            continue
+            
         try:
-            w_p="/dir/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5"#"/dir/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5"
-
-            metadata=Raclahe_process_nifti(pat_name,w_p,raclahe_input,user_output, pat_dir)
-        except:
-            print("Info:","Raclahe was unable to perform operation on that patient")
+            checker = MedicalImageReader(pat_dir)
+            raclahe_input = checker.read_image()
+            pat_name = str(file)
+            
+            metadata = Raclahe_process_nifti(pat_name, weights_path, raclahe_input, user_output, pat_dir)
+        except Exception as e:
+            print("Info:", f"Raclahe was unable to perform operation on patient {file}: {str(e)}")
+        
         progress.update(task, advance=1)
         sleep(1)
     print('Raclahe filter application has ended ')
