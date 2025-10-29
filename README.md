@@ -4,154 +4,139 @@ RACLAHE (Region-Adaptive Contrast Limited Adaptive Histogram Equalization) is an
 
 This repository supports the original publication in Nature's Scientific Reports: *"Region-Adaptive Magnetic Resonance Image Enhancement for improving CNN-based segmentation of the prostate and prostatic zones"* [doi:10.1038/s41598-023-27671-8](https://doi.org/10.1038/s41598-023-27671-8)
 
-## Quick Start with Docker
+---
 
-### EUCAIM Platform (Recommended)
+## 🚀 Quick Start
 
-This image is EUCAIM-compliant and can be run directly on the EUCAIM platform. The image follows EUCAIM security standards:
-- Runs as non-root user `ds` (uid 1000, gid 1000)
-- Uses standard EUCAIM volume mount points
-- No internet access required at runtime
-- Optimized for batch processing
-
-When running on EUCAIM, the volumes are automatically mounted at:
-- `/home/ds/datasets` - Input datasets (read-only)
-- `/home/ds/persistent-home` - Persistent user storage (output directory)
-- `/home/ds/persistent-shared-folder` - Shared storage
-
-### Quick Start with Docker Compose (Recommended)
+📖 **See [QUICKSTART.md](QUICKSTART.md) for detailed step-by-step instructions**
 
 ```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/RACLAHE_Image_Enhancement_for_CNN_model_segmentation.git
-cd RACLAHE_Image_Enhancement_for_CNN_model_segmentation
-
-# Create input and output directories
+# 1. Prepare your data
 mkdir -p input output shared
+cp -r /path/to/your/patients/* input/
 
-# Copy your medical imaging data to input/
-cp -r /path/to/your/data/* input/
+# 2. Run processing
+docker-compose up --build
 
-# Build and run with Docker Compose
+# 3. Get results from output/RACLAHE OUTPUT/
+```
+
+---
+
+## 📋 Requirements
+
+- Docker and Docker Compose
+- Medical images in DICOM (`.dcm`) or NIfTI (`.nii`, `.nii.gz`) format
+
+---
+
+## 📁 Input Data Format
+
+Organize your data with one folder per patient:
+
+### DICOM Series
+```
+input/
+├── patient001/
+│   ├── slice001.dcm
+│   ├── slice002.dcm
+│   └── ...
+└── patient002/
+    ├── slice001.dcm
+    └── ...
+```
+
+### NIfTI Files
+```
+input/
+├── patient001/
+│   └── scan.nii.gz
+└── patient002/
+    └── scan.nii.gz
+```
+
+---
+
+## 📤 Output Format
+
+Enhanced images are saved in the same format as input:
+
+```
+output/RACLAHE OUTPUT/
+├── patient001/
+│   ├── image_1.dcm      (if DICOM input)
+│   ├── image_2.dcm
+│   └── ...
+└── patient002/
+    └── patient002.nii.gz (if NIfTI input)
+```
+
+---
+
+## 🔧 Usage
+
+### With Docker Compose (Recommended)
+
+```bash
 docker-compose up --build
 ```
 
-### Building the Docker Image Manually
+### With Docker
 
 ```bash
-# Build the Docker image
-docker build -t raclahe:3.0 .
-```
+# Build
+docker build -t raclage:3.0 .
 
-### Running with Docker (without Compose)
-
-For local testing, you can override the default EUCAIM paths using environment variables:
-
-```bash
-# Create input and output directories
-mkdir -p ./input ./output
-
-# Run with EUCAIM-style paths (recommended)
+# Run
 docker run \
   -v $(pwd)/input:/home/ds/datasets:ro \
   -v $(pwd)/output:/home/ds/persistent-home \
   raclage:3.0
+```
 
-# Or run with custom paths via environment variables
+### Custom Paths
+
+```bash
 docker run \
-  -e INPUT_DIR=/dir/input \
-  -e OUTPUT_DIR=/dir/output \
-  -v $(pwd)/input:/dir/input:ro \
-  -v $(pwd)/output:/dir/output \
+  -e INPUT_DIR=/custom/input \
+  -e OUTPUT_DIR=/custom/output \
+  -v /your/input:/custom/input:ro \
+  -v /your/output:/custom/output \
   raclage:3.0
 ```
 
-### Using EUCAIM-Compliant Configuration
+---
 
-For production deployment on EUCAIM platform:
+## ✅ EUCAIM Platform Compliance
 
-```bash
-# Copy environment template
-cp env.example .env
+This image is fully EUCAIM-compliant:
 
-# Edit .env with your paths
-nano .env
+- ✅ Runs as non-root user `ds` (uid 1000, gid 1000)
+- ✅ Uses standard EUCAIM volume mount points:
+  - `/home/ds/datasets` - Input datasets (read-only)
+  - `/home/ds/persistent-home` - Output storage
+  - `/home/ds/persistent-shared-folder` - Shared storage
+- ✅ No internet access required at runtime
+- ✅ Batch processing optimized for medical imaging workflows
 
-# Run with EUCAIM configuration
-docker-compose -f docker-compose.eucaim.yml up --build
-```
+---
 
-📖 For detailed usage instructions, see [DOCKER_USAGE.md](DOCKER_USAGE.md)
+## 🧬 Algorithm Overview
 
-## Input Data Format
+RACLAHE enhances medical images by:
 
-RACLAHE accepts both DICOM and NIfTI file formats. Your data structure should follow one of these patterns:
+1. **Detecting** the prostate region using a pre-trained U-Net model
+2. **Applying** adaptive histogram equalization to the detected region
+3. **Preserving** original characteristics in non-prostatic regions
+4. **Combining** enhanced and unenhanced regions for the final output
 
-### For DICOM Series Input
+This targeted approach improves CNN segmentation performance by 3-9% (Dice score) across different prostatic regions.
 
-```
-input/
-├── patient1/
-│   ├── file1.dcm
-│   ├── file2.dcm
-│   └── ...
-├── patient2/
-│   ├── file1.dcm
-│   ├── file2.dcm
-│   └── ...
-└── ...
-```
+---
 
-### For NIfTI Input
+## 📊 Citation
 
-```
-input/
-├── patient1/
-│   └── image.nii (or image.nii.gz)
-├── patient2/
-│   └── image.nii (or image.nii.gz)
-└── ...
-```
-
-Each patient folder should contain a single NIfTI file or a series of DICOM files representing T2-weighted MRI scans of the prostate.
-
-## Output Data Format
-
-After processing, RACLAHE creates the following structure in your output directory:
-
-```
-output/
-└── RACLAHE OUTPUT/
-    ├── patient1/
-    │   ├── image_1.dcm (if DICOM input was used)
-    │   ├── image_2.dcm
-    │   └── ...
-    │   └── OR enhanced.nii (if NIfTI input was used)
-    ├── patient2/
-    │   └── ...
-    └── ...
-```
-
-
-## Algorithm Overview
-
-RACLAHE works by:
-1. Detecting the prostate region using a pre-trained bounding box proposal network
-2. Applying region-adaptive enhancement only to the detected prostatic area
-3. Preserving original image characteristics in non-prostatic regions
-4. Combining enhanced regions into a final output image
-
-![RACLAHE Algorithm](Materials/algorithm.png)
-
-## Results
-
-RACLAHE consistently improves segmentation performance across multiple CNN architectures with Dice Score improvements ranging from 3% to 9% for different prostatic regions.
-
-![RACLAHE Explainability](Materials/explainability.png)
-
-## Citation
-
-If you find our work valuable for your research, please cite:
+If you use RACLAHE in your research, please cite:
 
 ```bibtex
 @article{zaridis2023region,
@@ -166,19 +151,23 @@ If you find our work valuable for your research, please cite:
 }
 ```
 
-## Acknowledgements
+---
 
-This work is supported by the ProCancer-I project, funded by the European Union's Horizon 2020 research and innovation program under grant agreement No 952159.
+## 🆘 Support
 
-![ProCancer AI](Materials/Procancer_logo.png)
+For questions or issues:
+- 📖 Read the [QUICKSTART.md](QUICKSTART.md) guide
+- 📧 Contact: dimzaridis@gmail.com
+- 📄 Paper: https://doi.org/10.1038/s41598-023-27671-8
 
-## Contact
+---
 
-For support or questions about using RACLAHE, please contact:
-- Dimitrios I. Zaridis: dimzaridis@gmail.com
-
-## License
+## 📜 License
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-![Python](https://img.shields.io/pypi/pyversions/p?color=g&logo=python&style=plastic)
 
+---
+
+## 🙏 Acknowledgements
+
+This work is supported by the ProCancer-I project, funded by the European Union's Horizon 2020 research and innovation program under grant agreement No 952159.
