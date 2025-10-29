@@ -60,25 +60,72 @@ class dicom_save:
         # Ensure the output directory exists
         if not os.path.exists(self.output_directory):
             os.makedirs(self.output_directory)
-        k =sitk.GetArrayFromImage(self.processed_image)
+        
+        k = sitk.GetArrayFromImage(self.processed_image)
+        
+        # Read first DICOM to get original pixel value range
+        first_dicom = pydicom.dcmread(os.path.join(self.original_series_directory, dicom_files[0]))
+        
+        # Get original pixel array to determine the proper scaling
+        original_pixel_array = first_dicom.pixel_array
+        original_dtype = original_pixel_array.dtype
+        
+        # Determine the bit depth and value range
+        if hasattr(first_dicom, 'BitsStored'):
+            bits_stored = first_dicom.BitsStored
+            max_val = (2 ** bits_stored) - 1
+        else:
+            # Fallback to dtype max
+            max_val = float(original_pixel_array.max())
+        
         # Iterate over each slice in the processed image
         for i in range(k.shape[0]):  # Assuming the first dimension is the slice dimension
             # Extract the i-th slice
             slice_2d = k[i, :, :]
-
+            
             # Read the corresponding original DICOM file
             original_dicom = pydicom.dcmread(os.path.join(self.original_series_directory, dicom_files[i]))
+            
+            # Get original pixel range for this slice
+            original_slice = original_dicom.pixel_array
+            original_min = float(original_slice.min())
+            original_max = float(original_slice.max())
+            
+            # Scale the processed slice from [0, 1] back to original DICOM range
+            # First normalize to [0, 1] if not already
+            slice_min = slice_2d.min()
+            slice_max = slice_2d.max()
+            
+            if slice_max > slice_min:
+                slice_normalized = (slice_2d - slice_min) / (slice_max - slice_min)
+            else:
+                slice_normalized = slice_2d
+            
+            # Scale to original range
+            slice_rescaled = slice_normalized * (original_max - original_min) + original_min
+            
+            # Convert to original data type
+            slice_rescaled = slice_rescaled.astype(original_dtype)
 
             # Create a new DICOM file copying the original metadata
             new_dicom = Dataset()
             new_dicom = self.copy_dicom_metadata(original_dicom, new_dicom)
 
-            # Set pixel data to the processed image slice
-            new_dicom.PixelData = slice_2d.tobytes()
+            # Set pixel data to the properly scaled image slice
+            new_dicom.PixelData = slice_rescaled.tobytes()
+            
+            # Update pixel array to ensure consistency
+            new_dicom.Rows = slice_rescaled.shape[0]
+            new_dicom.Columns = slice_rescaled.shape[1]
 
             # Update specific metadata fields if necessary
             new_dicom.SOPInstanceUID = generate_uid()
             new_dicom.InstanceNumber = str(i + 1)
+            
+            # Update window center and width for proper display
+            if hasattr(original_dicom, 'WindowCenter') and hasattr(original_dicom, 'WindowWidth'):
+                new_dicom.WindowCenter = original_dicom.WindowCenter
+                new_dicom.WindowWidth = original_dicom.WindowWidth
 
             # Save the new DICOM file
             new_dicom.save_as(os.path.join(self.output_directory, f"image_{i + 1}.dcm"))

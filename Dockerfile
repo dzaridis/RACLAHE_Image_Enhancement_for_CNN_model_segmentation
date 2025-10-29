@@ -1,7 +1,7 @@
 ## Base image:
 FROM ubuntu:20.04
 
-LABEL name="raclage"
+LABEL name="raclahe"
 LABEL version="3.0"
 LABEL authorization="This Dockerfile is intended to build a container image that will be publicly accessible in the platform images repository."
 

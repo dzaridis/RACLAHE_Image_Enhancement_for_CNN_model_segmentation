@@ -6,7 +6,7 @@ version: '3.8'
 
 services:
   raclahe:
-    image: raclage:3.0
+    image: raclahe:3.0
     build:
       context: .
       dockerfile: Dockerfile
