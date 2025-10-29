@@ -11,3 +11,10 @@ nibabel==3.2.1
 rich
 SimpleITK==2.3.1
 
+# FastAPI and API dependencies
+fastapi==0.95.0
+uvicorn[standard]==0.21.1
+python-multipart==0.0.6
+aiofiles==23.1.0
+requests==2.28.2
+

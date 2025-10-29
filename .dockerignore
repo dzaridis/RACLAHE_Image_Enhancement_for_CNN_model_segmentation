@@ -28,11 +28,11 @@ venv.bak/
 *~
 
 # Testing
-test_*.py
 tests/
 .pytest_cache/
 .coverage
 htmlcov/
+test_api.py
 
 # Notebooks (unless needed)
 *.ipynb
@@ -52,4 +52,8 @@ test_input/
 test_output/
 input/
 output/
+shared/
 
+# Docker files (don't copy into image)
+docker-compose*.yml
+.dockerignore

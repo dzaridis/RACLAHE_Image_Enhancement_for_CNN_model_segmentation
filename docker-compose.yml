@@ -1,56 +1,63 @@
 version: '3.8'
 
+# RACLAHE FastAPI Service - EUCAIM Platform Configuration
+
 services:
   raclahe:
-    image: raclage:3.0
+    image: raclahe:3.0
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: raclahe-processor
+    container_name: raclahe-api
     
-    # EUCAIM-style volume mounts (default configuration)
-    volumes:
-      - ./input:/home/ds/datasets:ro  # Read-only input (EUCAIM standard)
-      - ./output:/home/ds/persistent-home
-      - ./shared:/home/ds/persistent-shared-folder
-    
-    # Environment variables (optional overrides)
-    environment:
-      - INPUT_DIR=/home/ds/datasets
-      - OUTPUT_DIR=/home/ds/persistent-home/output
-      - WEIGHTS_PATH=/home/ds/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5
-    
-    # User configuration (matches EUCAIM requirements)
-    user: "1000:1000"
-    
-    # Resource limits (optional, adjust as needed)
-    # deploy:
-    #   resources:
-    #     limits:
-    #       cpus: '4'
-    #       memory: 8G
-    #     reservations:
-    #       cpus: '2'
-    #       memory: 4G
-
-  # Alternative service for legacy path compatibility
-  raclahe-legacy:
-    image: raclage:3.0
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: raclahe-processor-legacy
-    profiles:
-      - legacy  # Only runs when --profile legacy is specified
-    
-    volumes:
-      - ./input:/dir/input:ro
-      - ./output:/dir/output
+    ports:
+      - "${API_PORT:-8000}:8000"
     
     environment:
-      - INPUT_DIR=/dir/input
-      - OUTPUT_DIR=/dir/output
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
       - WEIGHTS_PATH=/home/ds/BBOX_WEIGHTS/WHOLE GLAND/checkpoint_external.h5
+      - TEMP_DIR=/tmp/raclahe
+      - MAX_UPLOAD_SIZE=${MAX_UPLOAD_SIZE:-524288000}  # 500MB default
     
+    # EUCAIM standard volume mounts (optional for local testing)
+    # volumes:
+    #   - ${DATASET_PATH:-./input}:/home/ds/datasets:ro
+    #   - ${PERSISTENT_HOME:-./output}:/home/ds/persistent-home
+    #   - ${SHARED_FOLDER:-./shared}:/home/ds/persistent-shared-folder
+    
+    # User configuration (EUCAIM compliant)
     user: "1000:1000"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '${CPUS_LIMIT:-4}'
+          memory: ${MEMORY_LIMIT:-8G}
+        reservations:
+          cpus: '${CPUS_RESERVATION:-2}'
+          memory: ${MEMORY_RESERVATION:-4G}
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Security options (EUCAIM platform requirements)
+    security_opt:
+      - no-new-privileges:true
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 

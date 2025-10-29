@@ -4,84 +4,94 @@ RACLAHE (Region-Adaptive Contrast Limited Adaptive Histogram Equalization) is an
 
 This repository supports the original publication in Nature's Scientific Reports: *"Region-Adaptive Magnetic Resonance Image Enhancement for improving CNN-based segmentation of the prostate and prostatic zones"* [doi:10.1038/s41598-023-27671-8](https://doi.org/10.1038/s41598-023-27671-8)
 
-## Quick Start with Docker
+📚 **Quick Start**: See [QUICKSTART.md](QUICKSTART.md) for step-by-step instructions!
 
-### EUCAIM Platform (Recommended)
+## Quick Start
 
-This image is EUCAIM-compliant and can be run directly on the EUCAIM platform. The image follows EUCAIM security standards:
-- Runs as non-root user `ds` (uid 1000, gid 1000)
-- Uses standard EUCAIM volume mount points
-- No internet access required at runtime
-- Optimized for batch processing
+RACLAHE is available as a **REST API** for easy integration and file processing.
 
-When running on EUCAIM, the volumes are automatically mounted at:
-- `/home/ds/datasets` - Input datasets (read-only)
-- `/home/ds/persistent-home` - Persistent user storage (output directory)
-- `/home/ds/persistent-shared-folder` - Shared storage
-
-### Quick Start with Docker Compose (Recommended)
+### 🚀 Start the API Server
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/RACLAHE_Image_Enhancement_for_CNN_model_segmentation.git
+git clone <repository-url>
 cd RACLAHE_Image_Enhancement_for_CNN_model_segmentation
 
-# Create input and output directories
-mkdir -p input output shared
-
-# Copy your medical imaging data to input/
-cp -r /path/to/your/data/* input/
-
-# Build and run with Docker Compose
+# Build and start the API
 docker-compose up --build
+
+# The API will be available at http://localhost:8000
+# Interactive documentation at http://localhost:8000/docs
 ```
 
-### Building the Docker Image Manually
+### 📤 Process Images
+
+Upload and process files using cURL:
+
+```bash
+# Process DICOM series
+curl -X POST http://localhost:8000/process \
+  -F "files=@slice1.dcm" \
+  -F "files=@slice2.dcm" \
+  -F "files=@slice3.dcm" \
+  --output enhanced.zip
+
+# Process NIfTI file
+curl -X POST http://localhost:8000/process \
+  -F "files=@image.nii.gz" \
+  --output enhanced.zip
+```
+
+📖 **Full Documentation**: See [API_USAGE.md](API_USAGE.md) and [QUICKSTART.md](QUICKSTART.md)
+
+### ✅ EUCAIM Platform Compliance
+
+This image is fully EUCAIM-compliant:
+- ✅ Runs as non-root user `ds` (uid 1000, gid 1000)
+- ✅ Uses standard EUCAIM volume mount points
+- ✅ No internet access required at runtime
+- ✅ Production-ready with health checks
+- ✅ Security hardening enabled
+
+When deployed on EUCAIM, volumes are automatically mounted at:
+- `/home/ds/datasets` - Input datasets (read-only)
+- `/home/ds/persistent-home` - Persistent user storage
+- `/home/ds/persistent-shared-folder` - Shared storage
+
+### Building the Docker Image
 
 ```bash
 # Build the Docker image
 docker build -t raclahe:3.0 .
+
+# Or use Docker Compose
+docker-compose build
 ```
 
-### Running with Docker (without Compose)
-
-For local testing, you can override the default EUCAIM paths using environment variables:
+### Running with Docker
 
 ```bash
-# Create input and output directories
-mkdir -p ./input ./output
+# Using Docker Compose (recommended)
+docker-compose up
 
-# Run with EUCAIM-style paths (recommended)
-docker run \
-  -v $(pwd)/input:/home/ds/datasets:ro \
-  -v $(pwd)/output:/home/ds/persistent-home \
-  raclage:3.0
-
-# Or run with custom paths via environment variables
-docker run \
-  -e INPUT_DIR=/dir/input \
-  -e OUTPUT_DIR=/dir/output \
-  -v $(pwd)/input:/dir/input:ro \
-  -v $(pwd)/output:/dir/output \
-  raclage:3.0
+# Or with plain Docker
+docker run -p 8000:8000 raclahe:3.0
 ```
 
-### Using EUCAIM-Compliant Configuration
+### Configuration
 
-For production deployment on EUCAIM platform:
+Set environment variables to customize behavior:
 
 ```bash
-# Copy environment template
-cp env.example .env
+# Custom API port
+API_PORT=8080 docker-compose up
 
-# Edit .env with your paths
-nano .env
+# Increase upload size limit (in bytes)
+MAX_UPLOAD_SIZE=1073741824 docker-compose up  # 1GB
 
-# Run with EUCAIM configuration
-docker-compose -f docker-compose.eucaim.yml up --build
+# Custom resource limits
+CPUS_LIMIT=8 MEMORY_LIMIT=16G docker-compose up
 ```
-
-📖 For detailed usage instructions, see [DOCKER_USAGE.md](DOCKER_USAGE.md)
 
 ## Input Data Format
 
