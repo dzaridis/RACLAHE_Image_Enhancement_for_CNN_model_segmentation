@@ -1,13 +1,13 @@
-protobuf==3.19.6
-scikit_image
+protobuf==3.20.1
+scikit_image==0.19.1
 pydicom
 opencv_python==4.5.1.48
 tensorflow==2.2.0
-numpy
-matplotlib
+numpy==1.19.5
 keras_unet_collection==0.1.11
-pandas
+pandas==1.4.0
 glob2
 nibabel==3.2.1
 rich
+SimpleITK==2.3.1
 

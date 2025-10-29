@@ -6,8 +6,8 @@
 
 import numpy as np, pandas as pd, pydicom as dcm, os
 import nibabel as nib
+import SimpleITK as sitk
 from glob import glob
-import matplotlib.pyplot as plt
 from keras_unet_collection._model_unet_2d import unet_2d
 import cv2 as cv
 os.environ['GIT_PYTHON_REFRESH'] = "quiet"
@@ -16,6 +16,7 @@ import tensorflow as tf
 import numpy as np
 from skimage.exposure import equalize_adapthist
 import time
+from filereader import *
 
     
     
@@ -198,7 +199,7 @@ def roi_focus(d,weights_path,identity_patient):
         
     return cl_fr,bbox,coords
 
-def Raclahe_process_nifti(pat,w_p,user_input,user_output):
+def Raclahe_process_nifti(pat,w_p,patient,user_output, user_input):
     """
     Raclahe pipeline
     Args:
@@ -225,21 +226,41 @@ def Raclahe_process_nifti(pat,w_p,user_input,user_output):
     #path_pat=os.listdir(pth)
     
     #nif_pth=os.path.join(pth,path_pat[0])
-    series=nib.load(user_input)
-    imgs=series.get_data()
-    imgs=np.transpose(imgs, axes=(2,1,0))
-    assert (imgs.shape[0]<imgs.shape[1] and imgs.shape[0]<imgs.shape[2])
- 
+    #series=nib.load(user_input)
+    #imgs=series.get_data()
+    imgs = sitk.GetArrayFromImage(patient)
+    try:
+        assert (imgs.shape[0]<imgs.shape[1] and imgs.shape[0]<imgs.shape[2])
+    except AssertionError:
+        imgs=np.transpose(imgs, axes=(2,1,0))
     
     Raclahe_Enhanced_patients,proposed_box,coords = roi_focus(imgs,w_p,pat)
-    
+    image = sitk.GetImageFromArray(Raclahe_Enhanced_patients)
     #out_pth=os.path.join(out_pth,inp)
     dicts=[]
     identity={}
-    Raclahe_Enhanced_patients=np.transpose(Raclahe_Enhanced_patients,axes=(2,1,0))
-    assert (Raclahe_Enhanced_patients.shape[2]<Raclahe_Enhanced_patients.shape[0] and Raclahe_Enhanced_patients.shape[2]<Raclahe_Enhanced_patients.shape[1])
-    another_image=nib.Nifti1Image(Raclahe_Enhanced_patients, series.affine, series.header)
-    nib.save(another_image, os.path.join(out_pth,"{}".format(inp)))
+    #Raclahe_Enhanced_patients=np.transpose(Raclahe_Enhanced_patients,axes=(2,1,0))
+    #assert (Raclahe_Enhanced_patients.shape[2]<Raclahe_Enhanced_patients.shape[0] and Raclahe_Enhanced_patients.shape[2]<Raclahe_Enhanced_patients.shape[1])
+    try:
+        l = dicom_save(user_input, image, os.path.join(out_pth,"{}".format(inp)))
+        l.save_as_dicom_series()
+        print(f"{pat} dicom saved succesfully")
+    except IndexError:
+        image.SetSpacing(patient.GetSpacing())
+        image.SetOrigin(patient.GetOrigin())
+        image.SetDirection(patient.GetDirection())
+        try:
+            os.mkdir(os.path.join(out_pth, inp))
+        except:# FileExistsError:
+       # print("RACLAHE OUTPUT directory already exists")
+            pass
+        to_save = os.path.join(out_pth, inp)
+        sitk.WriteImage(image, os.path.join(to_save,"{}.nii.gz".format(inp)))
+        print(f"{pat} nifti saved succesfully")
+    except:
+        np.save(os.path.join(out_pth,"{}.npz".format(inp)),Raclahe_Enhanced_patients)
+    #another_image=nib.Nifti1Image(Raclahe_Enhanced_patients, series.affine, series.header)
+    #nib.save(another_image, os.path.join(out_pth,"{}".format(inp)))
     for i in range(len(coords)):
         identity.update({inp+"_Slice_{:02}".format(i):{"Enhanced Box":coords[i]}})
         

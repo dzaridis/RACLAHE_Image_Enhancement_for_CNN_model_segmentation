@@ -1,17 +1,111 @@
+# RACLAHE: Region Adaptive MR Image Enhancement for CNN-based Segmentation
 
-# Region Adaptive Magnetic Resonance Image Enhancement for improving CNN based segmentation of the prostate and prostatic zones
+RACLAHE (Region-Adaptive Contrast Limited Adaptive Histogram Equalization) is an image enhancement method specifically designed for improving CNN-based segmentation of the prostate and prostatic zones in T2-Weighted MR images.
 
-The current repo supports the Nature's Scientific report original publication \
-"Region-Adaptive Magnetic Resonance Image Enhancement for improving CNN-based segmentation of the prostate and prostatic zones", doi:10.1038/s41598-023-27671-8
+This repository supports the original publication in Nature's Scientific Reports: *"Region-Adaptive Magnetic Resonance Image Enhancement for improving CNN-based segmentation of the prostate and prostatic zones"* [doi:10.1038/s41598-023-27671-8](https://doi.org/10.1038/s41598-023-27671-8)
 
-The algorithm has been implemented to enhance the prostate's Whole Gland in T2-Weighted MR images.
-The repo contains 2 packages
- - Testing_Utils for instant usability on Prostate MR images (Demo_Testing_on_MRI_Prostate_Data.ipynb consists an example of utilization)
- - Training_Utils for training a bounding box proposal network on your data (Demo_Training_Process.ipynb consists an example of training your bounding box proposal network)
+## Quick Start with Docker
 
-# Reference
-Please cite our work if youu find it valuable for your experiments. Thank you!
-```bibted
+The fastest way to use RACLAHE is via our pre-built Docker image:
+
+```bash
+# Pull the Docker image
+docker pull dimzaridis/raclahe_filter:3.0
+
+# Create input and output directories
+mkdir -p ./input ./output
+
+# Run the container
+docker run -v $(pwd)/input:/dir/input -v $(pwd)/output:/dir/output dimzaridis/raclahe_filter:3.0
+```
+
+## Building the Docker Image Yourself
+
+If you prefer to build the image locally:
+
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/RACLAHE_Image_Enhancement_for_CNN_model_segmentation.git
+cd RACLAHE_Image_Enhancement_for_CNN_model_segmentation
+
+# Build the Docker image
+docker build -t raclahe_filter:local .
+
+# Run the container
+docker run -v $(pwd)/input:/dir/input -v $(pwd)/output:/dir/output raclahe_filter:local
+```
+
+## Input Data Format
+
+RACLAHE accepts both DICOM and NIfTI file formats. Your data structure should follow one of these patterns:
+
+### For DICOM Series Input
+
+```
+input/
+├── patient1/
+│   ├── file1.dcm
+│   ├── file2.dcm
+│   └── ...
+├── patient2/
+│   ├── file1.dcm
+│   ├── file2.dcm
+│   └── ...
+└── ...
+```
+
+### For NIfTI Input
+
+```
+input/
+├── patient1/
+│   └── image.nii (or image.nii.gz)
+├── patient2/
+│   └── image.nii (or image.nii.gz)
+└── ...
+```
+
+Each patient folder should contain a single NIfTI file or a series of DICOM files representing T2-weighted MRI scans of the prostate.
+
+## Output Data Format
+
+After processing, RACLAHE creates the following structure in your output directory:
+
+```
+output/
+└── RACLAHE OUTPUT/
+    ├── patient1/
+    │   ├── image_1.dcm (if DICOM input was used)
+    │   ├── image_2.dcm
+    │   └── ...
+    │   └── OR enhanced.nii (if NIfTI input was used)
+    ├── patient2/
+    │   └── ...
+    └── ...
+```
+
+
+## Algorithm Overview
+
+RACLAHE works by:
+1. Detecting the prostate region using a pre-trained bounding box proposal network
+2. Applying region-adaptive enhancement only to the detected prostatic area
+3. Preserving original image characteristics in non-prostatic regions
+4. Combining enhanced regions into a final output image
+
+![RACLAHE Algorithm](Materials/algorithm.png)
+
+## Results
+
+RACLAHE consistently improves segmentation performance across multiple CNN architectures with Dice Score improvements ranging from 3% to 9% for different prostatic regions.
+
+![RACLAHE Explainability](Materials/explainability.png)
+
+## Citation
+
+If you find our work valuable for your research, please cite:
+
+```bibtex
 @article{zaridis2023region,
   title={Region-adaptive magnetic resonance image enhancement for improving CNN-based segmentation of the prostate and prostatic zones},
   author={Zaridis, Dimitrios I and Mylona, Eugenia and Tachos, Nikolaos and Pezoulas, Vasileios C and Grigoriadis, Grigorios and Tsiknakis, Nikos and Marias, Kostas and Tsiknakis, Manolis and Fotiadis, Dimitrios I},
@@ -23,97 +117,20 @@ Please cite our work if youu find it valuable for your experiments. Thank you!
   publisher={Nature Publishing Group UK London}
 }
 ```
-Zaridis, Dimitrios I., et al. "Region-adaptive magnetic resonance image enhancement for improving CNN-based segmentation of the prostate and prostatic zones." Scientific Reports 13.1 (2023): 714.
-## Installation
-### First way of installation
- - install the requirements.txt via pip and the raclahe package fro PyPI afterwards https://pypi.org/project/raclahe/
-```bash
-  pip install -r requirements.txt
-  pip install raclahe==0.1.1 (current version)
-```
-
-### Second way of installation
-In order to Utilize the project
- - install the requirements.txt via pip 
-```bash
-  pip install requirements.txt
-```
-Download the Training_Utils and Testing_Utils folders
-into your project and import them in a python editor (jupyter notebook, VScode etc.)
-```code
-import Training_Utils,Testing_Utils
-```
-### Docker Pull
-You can pull the docker directly from here. Firstly request access from dimzaridis@gmail.com
-```bash
-docker pull dimzaridis/raclahe_filter:2.0
-```
-    
-## Abstract
-Automatic segmentation of the prostate of and the prostatic zones on MRI remains one of the most compelling research areas. While different image enhancement techniques are emerging as powerful tools for improving the performance of segmentation algorithms, their application still lacks consensus due to contrasting evidence regarding performance improvement and cross-model stability, further hampered by the inability to explain models’ predictions. Particularly, for prostate segmentation, the effectiveness of image enhancement on different Convolutional Neural Networks (CNN) remains largely unexplored.  The present work introduces a novel image enhancement method, named RACLAHE, to enhance the performance of CNN models for segmenting the prostate’s gland and the prostatic zones. The improvement in performance and consistency across five CNN models (U-Net, U-Net++, U-Net3+, ResU-net and USE-NET) is compared against four popular image enhancement methods. Additionally, a methodology is proposed to explain, both quantitatively and qualitatively, the relation between saliency maps and ground truth probability maps. Overall, RACLAHE was the most consistent image enhancement algorithm in terms of performance improvement across CNN models with the mean increase in Dice Score ranging from 3% to 9% for the different prostatic regions, while achieving minimal inter-model variability. The integration of a feature driven methodology to explain the predictions after applying image enhancement methods, enables the development of a concrete, trustworthy automated pipeline for prostate segmentation on MR images.
-## Study's Results
-Several Results are shown below regarding the effectiveness of the proposed method vs various image enhancement methods in a single deep learning model
-Specifically, fig below indicate how the proposed image enhancement method effectively assist the USE-Net model to identify important for the model's decision features.
-![Raclahe filter](Materials/explainability.png)
-
-Moreover the proposed method's methodology is presented below
-
-![Raclahe filter](Materials/algorithm.png)
 
 ## Acknowledgements
- - This work is supported by the ProCancer-I project, funded by the European Union’s Horizon 2020 research and innovation program under grant agreement No 952159. It reflects only the author's view. The Commission is not responsible for any use that may be made of the information it contains.
 
+This work is supported by the ProCancer-I project, funded by the European Union's Horizon 2020 research and innovation program under grant agreement No 952159.
 
-## Authors
+![ProCancer AI](Materials/Procancer_logo.png)
 
- - Dimitrios I. Zaridis: dimzaridis@gmail.com
- - Eugenia Mylona: mylona.eugenia@gmail.com
- - Nikolaos Tachos :ntachos@gmail.com
- - Vasileios C. Pezoulas
- - Grigorios Grigoriadis
- - Nikos Tsiknakis
- - Kostas Marias
- - Manolis Tsiknakis
- - Dimitrios I. Fotiadis
+## Contact
 
+For support or questions about using RACLAHE, please contact:
+- Dimitrios I. Zaridis: dimzaridis@gmail.com
 
+## License
 
-## Badges
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 ![Python](https://img.shields.io/pypi/pyversions/p?color=g&logo=python&style=plastic)
-
-
-![ProCAncer AI](Materials/Procancer_logo.png)
-
-
-## Usage/Examples
- - An example for testing on your Prostate MR Imaging dataset could be found at the Demo_Testing_On_MRI_Prostate_data.ipynb also. Furthermore the repo has been dockerized and it could be available upon request. /
-The weights path for the region proposition U-Net model (The Weights could be downloaded from here https://drive.google.com/drive/folders/1uctJpPYj2LyE-kuuXPIv3BSXSXgC4AdY?usp=share_link)
-```python
-from Testing_Utils.Raclahe_Process import * # import the package
-
-pat_name    = "Example" 
-w_p         = "Path/to/Weights/bbox_weights.h5"
-path_inp    = "Path/To/Folder" # Folder includes patients in nifti format
-user_output = "Path/To/Save_Folder" # folder to save the Raclahe operation outcome in nifti format
-Raclahe_enhanced_patients = Raclahe_process_nifti(pat_name,w_p,path_inp,user_output)
-```
-
- - An example for training your own region proposal model on your dataset could be found at the Demo_Training_Process.ipynb also
-```python
-from Training_Utils import * # import the package
-
-pats = nib.load("Path/to/patients")
-labs = nib.load("Path/to/labels")
-
-pats_process = Bounding_Box_Operations.Bounding_Box_Preprocessing(pats,labs).resize(256,256,anno=False) # resize to 256x256
-pats_process = Bounding_Box_Operations.Bounding_Box_Preprocessing(pats_process,labs).norm8bit() # Normalize to 8Bit
-pats_process = Bounding_Box_Operations.Bounding_Box_Preprocessing(pats_process,labs).Standardization(min_max=True) # Standardize for the training process
-pats_process,labs_process,_,bbox = Bounding_Box_Operations.Bounding_Box_Preprocessing(pats_process,labs).bounding_box_creation(size=30,path="",extract_bounding=False) # creation of the bounding box
-bbox = Bounding_Box_Operations.Bounding_Box_Preprocessing(_,bbox).resize(256,256,anno=True) # resize the bounding box to 256x256
-
-Bounding_Box_Operations.model_training(data_train=pats[:300],labels_train=bbox[:300],
-                                       data_val=pats[300:350],labels_val=bbox[300:350],
-                                       save_weights_path="Path/To/Save_the_Weights")
-```
 
