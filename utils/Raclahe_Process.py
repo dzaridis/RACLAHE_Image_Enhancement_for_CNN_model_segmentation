@@ -241,24 +241,40 @@ def Raclahe_process_nifti(pat,w_p,patient,user_output, user_input):
     identity={}
     #Raclahe_Enhanced_patients=np.transpose(Raclahe_Enhanced_patients,axes=(2,1,0))
     #assert (Raclahe_Enhanced_patients.shape[2]<Raclahe_Enhanced_patients.shape[0] and Raclahe_Enhanced_patients.shape[2]<Raclahe_Enhanced_patients.shape[1])
+
+    # Check if input directory contains DICOM or NIfTI files
+    input_files = os.listdir(user_input)
+    has_dicom = any(f.lower().endswith('.dcm') for f in input_files)
+    has_nifti = any(f.endswith('.nii') or f.endswith('.nii.gz') for f in input_files)
+
     try:
-        l = dicom_save(user_input, image, os.path.join(out_pth,"{}".format(inp)))
-        l.save_as_dicom_series()
-        print(f"{pat} dicom saved succesfully")
-    except IndexError:
-        image.SetSpacing(patient.GetSpacing())
-        image.SetOrigin(patient.GetOrigin())
-        image.SetDirection(patient.GetDirection())
-        try:
-            os.mkdir(os.path.join(out_pth, inp))
-        except:# FileExistsError:
-       # print("RACLAHE OUTPUT directory already exists")
-            pass
-        to_save = os.path.join(out_pth, inp)
-        sitk.WriteImage(image, os.path.join(to_save,"{}.nii.gz".format(inp)))
-        print(f"{pat} nifti saved succesfully")
-    except:
+        if has_dicom:
+            # Save as DICOM series
+            l = dicom_save(user_input, image, os.path.join(out_pth,"{}".format(inp)))
+            l.save_as_dicom_series()
+            print(f"{pat} dicom saved succesfully")
+        elif has_nifti:
+            # Save as NIfTI
+            image.SetSpacing(patient.GetSpacing())
+            image.SetOrigin(patient.GetOrigin())
+            image.SetDirection(patient.GetDirection())
+            try:
+                os.mkdir(os.path.join(out_pth, inp))
+            except:# FileExistsError:
+           # print("RACLAHE OUTPUT directory already exists")
+                pass
+            to_save = os.path.join(out_pth, inp)
+            sitk.WriteImage(image, os.path.join(to_save,"{}.nii.gz".format(inp)))
+            print(f"{pat} nifti saved succesfully")
+        else:
+            # Fallback to numpy format
+            np.save(os.path.join(out_pth,"{}.npz".format(inp)),Raclahe_Enhanced_patients)
+            print(f"{pat} saved as numpy array (no DICOM or NIfTI format detected)")
+    except Exception as e:
+        print(f"Error saving {pat}: {str(e)}")
+        # Fallback to numpy format
         np.save(os.path.join(out_pth,"{}.npz".format(inp)),Raclahe_Enhanced_patients)
+        print(f"{pat} saved as numpy array due to error")
     #another_image=nib.Nifti1Image(Raclahe_Enhanced_patients, series.affine, series.header)
     #nib.save(another_image, os.path.join(out_pth,"{}".format(inp)))
     for i in range(len(coords)):

@@ -60,13 +60,13 @@ output/RACLAHE OUTPUT/
 
 ```bash
 # Build image
-docker build -t raclage:3.0 .
+docker build -t raclahe:3.0 .
 
 # Run with volumes
 docker run \
   -v $(pwd)/input:/home/ds/datasets:ro \
   -v $(pwd)/output:/home/ds/persistent-home \
-  raclage:3.0
+  raclahe:3.0
 ```
 
 ---
