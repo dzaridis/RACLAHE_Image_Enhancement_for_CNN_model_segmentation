@@ -59,14 +59,14 @@ output/RACLAHE OUTPUT/
 ## Alternative: Run with Docker (without Compose)
 
 ```bash
-# Build image
+# Build image (run `git lfs pull` first to fetch bbox_weights/)
 docker build -t raclahe:3.0 .
 
 # Run with volumes
 docker run \
   -v $(pwd)/input:/home/ds/datasets:ro \
   -v $(pwd)/output:/home/ds/persistent-home \
-  raclahe:3.0
+  raclahe:3.0 /home/ds/datasets /home/ds/persistent-home/output
 ```
 
 ---
@@ -78,21 +78,39 @@ On EUCAIM, volumes are automatically mounted:
 - `/home/ds/persistent-home` → Your output directory
 - `/home/ds/persistent-shared-folder` → Shared storage
 
-Simply deploy the image and it will process all patients in the datasets directory.
+Submit the job with `jobman`, passing the input and output directories after
+the `--` separator:
+
+```bash
+jobman submit -i raclahe -- <INPUT_DIR> <OUTPUT_DIR>
+```
+
+```bash
+jobman submit -i raclahe -- ~/datasets/87f3be56-4725-45c3-9baa-d338de530f73/ ~/persistent-home/results/
+```
+
+Pick an `OUTPUT_DIR` under `persistent-home`, otherwise the results are lost
+when the job ends. If both arguments are omitted, the tool falls back to
+`/home/ds/datasets` and `/home/ds/persistent-home/output`.
 
 ---
 
 ## Configuration
 
-Override paths using environment variables:
+| Argument | Description | Default |
+| --- | --- | --- |
+| `INPUT_DIR` (1st positional) | Dataset directory, one sub-directory per patient | `/home/ds/datasets` |
+| `OUTPUT_DIR` (2nd positional) | Where the enhanced images are written | `/home/ds/persistent-home/output` |
+| `--weights` | Bounding-box U-Net weights (`.h5`) | `/home/ds/bbox_weights/checkpoint_external.h5` |
+
+The environment variables `INPUT_DIR`, `OUTPUT_DIR` and `WEIGHTS_PATH` are
+still honoured as fallbacks; command-line arguments take precedence.
 
 ```bash
 docker run \
-  -e INPUT_DIR=/custom/input \
-  -e OUTPUT_DIR=/custom/output \
   -v $(pwd)/input:/custom/input:ro \
   -v $(pwd)/output:/custom/output \
-  raclage:3.0
+  raclahe:3.0 /custom/input /custom/output
 ```
 
 ---
