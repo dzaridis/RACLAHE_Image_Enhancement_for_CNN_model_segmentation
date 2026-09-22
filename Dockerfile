@@ -26,11 +26,19 @@ RUN groupadd -g 1000 ds && \
 # Default password "password" for ds user
 RUN echo "ds:password" | chpasswd
 
-# Copy application files to the container
-COPY --chown=ds:ds . /home/ds/
+# Copy only the files required at runtime (never the whole build context:
+# that would pull in .git, Dockerfile, docker-compose.yml, Demo Materials, ...)
+COPY --chown=ds:ds requirements.txt /home/ds/
 
 # Install Python requirements
 RUN pip install --no-cache-dir -r /home/ds/requirements.txt
+
+COPY --chown=ds:ds __main__.py LICENSE NOTICE README.md /home/ds/
+COPY --chown=ds:ds utils/ /home/ds/utils/
+
+# Bounding-box U-Net weights required by the RACLAHE pipeline.
+# Tracked in this repository with Git LFS; run `git lfs pull` before building.
+COPY --chown=ds:ds bbox_weights/ /home/ds/bbox_weights/
 
 ############### Now change to normal user ################
 USER ds:ds

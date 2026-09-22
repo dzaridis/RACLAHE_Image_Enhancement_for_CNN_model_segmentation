@@ -133,3 +133,8 @@ dmypy.json
 DOCKER_USAGE.md
 input
 output
+# Model weights are shipped with the repo via Git LFS
+!bbox_weights/*.h5
+
+# macOS
+.DS_Store

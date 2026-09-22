@@ -96,14 +96,42 @@ docker run \
 
 ### Custom Paths
 
+The entrypoint accepts two optional positional arguments, `INPUT_DIR` and
+`OUTPUT_DIR`:
+
+```
+raclahe [INPUT_DIR] [OUTPUT_DIR] [--weights WEIGHTS_PATH]
+```
+
+| Argument | Description | Default |
+| --- | --- | --- |
+| `INPUT_DIR` | Dataset directory, one sub-directory per patient | `/home/ds/datasets` |
+| `OUTPUT_DIR` | Where the enhanced images are written | `/home/ds/persistent-home/output` |
+| `--weights` | Bounding-box U-Net weights (`.h5`) | `/home/ds/bbox_weights/checkpoint_external.h5` |
+
 ```bash
 docker run \
-  -e INPUT_DIR=/custom/input \
-  -e OUTPUT_DIR=/custom/output \
   -v /your/input:/custom/input:ro \
   -v /your/output:/custom/output \
-  raclage:3.0
+  raclahe:3.0 /custom/input /custom/output
 ```
+
+The equivalent environment variables `INPUT_DIR`, `OUTPUT_DIR` and
+`WEIGHTS_PATH` are still honoured; command-line arguments take precedence.
+
+### On the EUCAIM platform
+
+```bash
+jobman submit -i raclahe -- <INPUT_DIR> <OUTPUT_DIR>
+```
+
+```bash
+jobman submit -i raclahe -- ~/datasets/87f3be56-4725-45c3-9baa-d338de530f73/ ~/persistent-home/results/
+```
+
+`OUTPUT_DIR` should be a path under `persistent-home`, which is shared between
+all desktops and jobs of the user; otherwise the results are lost when the job
+ends.
 
 ---
 
@@ -164,7 +192,9 @@ For questions or issues:
 
 ## 📜 License
 
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![EUPL-1.2 License](https://img.shields.io/badge/License-EUPL--1.2-blue.svg)](https://eupl.eu/1.2/en/)
+
+Licensed under the European Union Public Licence (EUPL) v1.2 - see [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ---
 
