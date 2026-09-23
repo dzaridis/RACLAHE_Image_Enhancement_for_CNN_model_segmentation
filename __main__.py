@@ -65,6 +65,7 @@ def main(argv=None):
     print(f'Weights path: {weights_path}')
     print(f'Processing {len(dirs)} items...')
 
+    patients, succeeded = 0, 0
     with Progress() as progress:
         task = progress.add_task(
             "[bold green]Raclahe Processing...[/bold green]", total=len(dirs))
@@ -74,6 +75,7 @@ def main(argv=None):
             if not os.path.isdir(pat_dir):
                 progress.update(task, advance=1)
                 continue
+            patients += 1
 
             try:
                 checker = MedicalImageReader(pat_dir)
@@ -82,6 +84,7 @@ def main(argv=None):
 
                 metadata = Raclahe_process_nifti(
                     pat_name, weights_path, raclahe_input, user_output, pat_dir)
+                succeeded += 1
             except Exception as e:
                 print("Info:", f"Raclahe was unable to perform operation on "
                                f"patient {file}: {str(e)}")
@@ -89,6 +92,20 @@ def main(argv=None):
             progress.update(task, advance=1)
             sleep(1)
     print('Raclahe filter application has ended ')
+
+    # Exit non-zero whenever nothing was produced. An input directory holding
+    # no usable sub-directories is almost always a path pointed one level too
+    # deep (e.g. at a DICOM series folder rather than at its parent), and
+    # exiting 0 there makes a batch run look successful while doing nothing.
+    if patients == 0:
+        sys.exit("ERROR: no patient directories found in "
+                 f"{user_input}. RACLAHE expects the input directory to "
+                 "CONTAIN one sub-directory per patient or series, each "
+                 "holding the DICOM/NIfTI files directly "
+                 "(INPUT_DIR/<patient>/*.dcm). Point it one level higher.")
+    if succeeded == 0:
+        sys.exit(f"ERROR: none of the {patients} study/studies could be "
+                 "processed.")
 
 
 if __name__ == '__main__':
